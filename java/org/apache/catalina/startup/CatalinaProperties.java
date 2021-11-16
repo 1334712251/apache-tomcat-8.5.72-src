@@ -55,6 +55,9 @@ public class CatalinaProperties {
 
 
     /**
+     *
+     * 将catalina.properties里的属性设置为系统属性
+     *
      * Load properties.
      */
     private static void loadProperties() {
@@ -62,6 +65,8 @@ public class CatalinaProperties {
         InputStream is = null;
         try {
             String configUrl = System.getProperty("catalina.config");
+            //System.out.println("uuuuuuuuuuu------>"+configUrl);
+            //uuuuuuuuuuu------>null
             if (configUrl != null) {
                 is = (new URL(configUrl)).openStream();
             }
@@ -69,11 +74,16 @@ public class CatalinaProperties {
             handleThrowable(t);
         }
 
+        ////为空，执行这里
         if (is == null) {
             try {
+                //这里读取JVM设置的参数配置的地址home目录
                 File home = new File(Bootstrap.getCatalinaBase());
                 File conf = new File(home, "conf");
                 File propsFile = new File(conf, "catalina.properties");
+//                String path = propsFile.getPath();
+//                System.out.println("oooooooooooooo_______>>"+path);
+                //oooooooooooooo_______>>F:\IdeaProjects\apache-tomcat-8.5.72-src\home\conf\catalina.properties
                 is = new FileInputStream(propsFile);
             } catch (Throwable t) {
                 handleThrowable(t);
@@ -89,9 +99,12 @@ public class CatalinaProperties {
             }
         }
 
+        //在执行这里，不为空
         if (is != null) {
             try {
+                //创建一个Properties对象
                 properties = new Properties();
+                //加载里面的属性
                 properties.load(is);
             } catch (Throwable t) {
                 handleThrowable(t);
@@ -113,6 +126,7 @@ public class CatalinaProperties {
         }
 
         // Register the properties as system properties
+        //将properties的属性注册为系统属性
         Enumeration<?> enumeration = properties.propertyNames();
         while (enumeration.hasMoreElements()) {
             String name = (String) enumeration.nextElement();

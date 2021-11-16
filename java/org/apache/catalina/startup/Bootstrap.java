@@ -138,9 +138,11 @@ public final class Bootstrap {
 
     // -------------------------------------------------------- Private Methods
 
-
+    //该方法负责给类级字段 commonLoader ，catalinaLoader，sharedLoader 赋值
     private void initClassLoaders() {
         try {
+            //这里的common，loader，类型为URLClassLoader
+            //其中parent classloader为了sun
             commonLoader = createClassLoader("common", null);
             if (commonLoader == null) {
                 // no config file, default to this loader - we might be in a 'single' env.
@@ -156,16 +158,18 @@ public final class Bootstrap {
     }
 
 
+    //读取catalina.properties里的属性里的common.loader属性
     private ClassLoader createClassLoader(String name, ClassLoader parent)
         throws Exception {
 
         String value = CatalinaProperties.getProperty(name + ".loader");
+        //"${catalina.base}/lib","${catalina.base}/lib/*.jar","${catalina.home}/lib","${catalina.home}/lib/*.jar"
         if ((value == null) || (value.equals(""))) {
             return parent;
         }
-
+        //replace方法读取JVM的属性值与前面的value拼接成lib,*.jar
         value = replace(value);
-
+        //"F:\IdeaProjects\apache-tomcat-8.5.72-src\home/lib","F:\IdeaProjects\apache-tomcat-8.5.72-src\home/lib/*.jar","F:\IdeaProjects\apache-tomcat-8.5.72-src\home/lib","F:\IdeaProjects\apache-tomcat-8.5.72-src\home/lib/*.jar"
         List<Repository> repositories = new ArrayList<>();
 
         String[] repositoryPaths = getPaths(value);
@@ -249,6 +253,7 @@ public final class Bootstrap {
      */
     public void init() throws Exception {
 
+        //初始化相关类加载器
         initClassLoaders();
 
         Thread.currentThread().setContextClassLoader(catalinaLoader);
