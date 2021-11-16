@@ -440,14 +440,17 @@ public final class Bootstrap {
         synchronized (daemonLock) {
             if (daemon == null) {
                 // Don't set daemon until init() has completed
+                // 实例化一个当前Bootstrap引导对象
                 Bootstrap bootstrap = new Bootstrap();
                 try {
+                    //执行当前类方法init做一些初始化动作
                     bootstrap.init();
                 } catch (Throwable t) {
                     handleThrowable(t);
                     t.printStackTrace();
                     return;
                 }
+                //把当前Bootstrap引导类对象赋值给了一个变量daemon
                 daemon = bootstrap;
             } else {
                 // When running as a service the call to stop will be on a new
