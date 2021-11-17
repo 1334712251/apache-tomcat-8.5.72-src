@@ -261,6 +261,7 @@ public class Catalina {
      */
     protected File configFile() {
 
+        //读取server.xml文件
         File file = new File(configFile);
         if (!file.isAbsolute()) {
             file = new File(Bootstrap.getCatalinaBase(), configFile);
@@ -543,6 +544,7 @@ public class Catalina {
         initNaming();
 
         // Create and execute our Digester
+        //创建Digester用于xml解析，用于解析server.xml配置文件
         Digester digester = createStartDigester();
 
         InputSource inputSource = null;
@@ -608,6 +610,7 @@ public class Catalina {
             try {
                 inputSource.setByteStream(inputStream);
                 digester.push(this);
+                //调用digester对象真正的去解析xml
                 digester.parse(inputSource);
             } catch (SAXParseException spe) {
                 log.warn("Catalina.start using " + getConfigFile() + ": " +

@@ -137,8 +137,8 @@ public final class Bootstrap {
 
 
     // -------------------------------------------------------- Private Methods
-
-    //该方法负责给类级字段 commonLoader ，catalinaLoader，sharedLoader 赋值
+    //初始化类加载器
+    //该方法读取catalina.properties里的属性值的common.loader，server.loader，shared.loader的值加载里面定义的jar包，加载为class对象
     private void initClassLoaders() {
         try {
             //这里的common，loader，类型为URLClassLoader
@@ -148,6 +148,7 @@ public final class Bootstrap {
                 // no config file, default to this loader - we might be in a 'single' env.
                 commonLoader = this.getClass().getClassLoader();
             }
+            //如果为空，就用上面的类加载器 commonLoader
             catalinaLoader = createClassLoader("server", commonLoader);
             sharedLoader = createClassLoader("shared", commonLoader);
         } catch (Throwable t) {
@@ -172,13 +173,15 @@ public final class Bootstrap {
         //"F:\IdeaProjects\apache-tomcat-8.5.72-src\home/lib","F:\IdeaProjects\apache-tomcat-8.5.72-src\home/lib/*.jar","F:\IdeaProjects\apache-tomcat-8.5.72-src\home/lib","F:\IdeaProjects\apache-tomcat-8.5.72-src\home/lib/*.jar"
         List<Repository> repositories = new ArrayList<>();
 
+        //这里做切割
         String[] repositoryPaths = getPaths(value);
 
         for (String repository : repositoryPaths) {
             // Check for a JAR URL repository
             try {
+                //@SuppressWarnings("unused") 表示该属性在方法或类中没有使用。添加此注解可以去除属性上的黄色警告！！！
                 @SuppressWarnings("unused")
-                URL url = new URL(repository);
+                URL url = new URL(repository);    //这里应该是检查这个包是否支持url属性，支持就设置类型为url，不支持就报错，但是这里不处理，继续往下运行
                 repositories.add(new Repository(repository, RepositoryType.URL));
                 continue;
             } catch (MalformedURLException e) {
@@ -255,19 +258,22 @@ public final class Bootstrap {
 
         //初始化相关类加载器
         initClassLoaders();
-
+        //设置线程的设置上下文类加载器
         Thread.currentThread().setContextClassLoader(catalinaLoader);
-
+        //安全类负载
         SecurityClassLoad.securityClassLoad(catalinaLoader);
 
         // Load our startup class and call its process() method
         if (log.isDebugEnabled()) {
             log.debug("Loading startup class");
         }
+        //把Catalina类加载上来，并且实例化了一个Catalina对象赋值给startupInstance
         Class<?> startupClass = catalinaLoader.loadClass("org.apache.catalina.startup.Catalina");
+        //获取一个Catalina构造方法new一个实例
         Object startupInstance = startupClass.getConstructor().newInstance();
 
         // Set the shared extensions class loader
+        //没有开启调试
         if (log.isDebugEnabled()) {
             log.debug("Setting startup class properties");
         }
@@ -276,10 +282,13 @@ public final class Bootstrap {
         paramTypes[0] = Class.forName("java.lang.ClassLoader");
         Object paramValues[] = new Object[1];
         paramValues[0] = sharedLoader;
+        //获取Catalina类里的setParentClassLoader方法
         Method method =
             startupInstance.getClass().getMethod(methodName, paramTypes);
+        //通过反射执行这个setParentClassLoader方法
+        //其中，第一个参数是这个方法的实例，第二个参数是这个方法所需要传入的参数
         method.invoke(startupInstance, paramValues);
-
+        //将Catalina对象赋值给catalinaDaemon全局私有属性
         catalinaDaemon = startupInstance;
     }
 
@@ -307,6 +316,7 @@ public final class Bootstrap {
         if (log.isDebugEnabled()) {
             log.debug("Calling startup class " + method);
         }
+        //执行Catalina方法里的load方法，传入param=null，调用的是无参方法
         method.invoke(catalinaDaemon, param);
     }
 
@@ -318,6 +328,7 @@ public final class Bootstrap {
 
         String methodName = "getServer";
         Method method = catalinaDaemon.getClass().getMethod(methodName);
+        //执行Catalina方法里的getServer方法，并返回
         return method.invoke(catalinaDaemon);
     }
 
@@ -411,6 +422,7 @@ public final class Bootstrap {
         paramValues[0] = Boolean.valueOf(await);
         Method method =
             catalinaDaemon.getClass().getMethod("setAwait", paramTypes);
+        //执行Catalina方法里的setAwait方法
         method.invoke(catalinaDaemon, paramValues);
     }
 
@@ -479,9 +491,15 @@ public final class Bootstrap {
                 args[args.length - 1] = "stop";
                 daemon.stop();
             } else if (command.equals("start")) {
+                //进入这里
+                //执行Catalina方法里的setAwait方法
                 daemon.setAwait(true);
+                //执行Catalina方法里的load方法
                 daemon.load(args);
+                //执行Catalina方法里的start方法
                 daemon.start();
+                //执行Catalina方法里的getServer方法
+                //如果返回为空，停止运行
                 if (null == daemon.getServer()) {
                     System.exit(1);
                 }
