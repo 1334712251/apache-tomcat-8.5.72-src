@@ -278,9 +278,13 @@ public class Catalina {
     protected Digester createStartDigester() {
         long t1=System.currentTimeMillis();
         // Initialize the digester
+        //// 实例化一个Digester对象
         Digester digester = new Digester();
+        // 设置为false表示解析xml时不需要进行DTD的规则校验
         digester.setValidating(false);
+        // 是否进行节点设置规则校验,如果xml中相应节点没有设置解析规则会在控制台显示提示信息
         digester.setRulesValidation(true);
+        // 将xml节点中的className作为假属性，不必调用默认的setter方法（一般的节点属性在解析时将会以属性值作为入参调用该节点相应对象的setter方法，而className属性的作用是提示解析器用该属性的值来实例化对象）
         Map<Class<?>, List<String>> fakeAttributes = new HashMap<>();
         List<String> objectAttrs = new ArrayList<>();
         objectAttrs.add("className");
@@ -292,14 +296,30 @@ public class Catalina {
         digester.setFakeAttributes(fakeAttributes);
         digester.setUseContextClassLoader(true);
 
+
+        /**
+         *
+         * addObjectCreate方法，实例化一个对象
+         * addSetProperties方法：给这个对象赋值
+         * addSetNext方法：调用栈顶的方法，传入的值是栈低的值
+         *
+         */
+
         // Configure the actions we will be using
+        // addObjectCreate方法的意思是碰到xml文件中的Server节点则创建一个StandardServer对象
         digester.addObjectCreate("Server",
                                  "org.apache.catalina.core.StandardServer",
                                  "className");
+        // 根据Server节点中的属性信息调用相应属性的setter方法，还会调用setPort、setShutdown方法，入参分别是8005、SHUTDOWN
+        //设置属性
         digester.addSetProperties("Server");
+        // 将Server节点对应的对象作为入参调用栈顶对象的setServer方法，
+        // 这里的栈顶对象即下面的digester.push方法所设置的当前类的对象this，就是说调用MyDigester类的setMyServer方法
+        //addSetNext是调用栈顶的方法，传入的值是栈低的值
         digester.addSetNext("Server",
                             "setServer",
                             "org.apache.catalina.Server");
+
 
         digester.addObjectCreate("Server/GlobalNamingResources",
                                  "org.apache.catalina.deploy.NamingResourcesImpl");
@@ -308,6 +328,7 @@ public class Catalina {
                             "setGlobalNamingResources",
                             "org.apache.catalina.deploy.NamingResourcesImpl");
 
+        // 碰到xml的Server节点下的Listener节点时取className属性的值作为实例化类实例化一个对象
         digester.addObjectCreate("Server/Listener",
                                  null, // MUST be specified in the element
                                  "className");
@@ -534,6 +555,7 @@ public class Catalina {
         if (loaded) {
             return;
         }
+        //不给第二次加载
         loaded = true;
 
         long t1 = System.nanoTime();
@@ -545,6 +567,7 @@ public class Catalina {
 
         // Create and execute our Digester
         //创建Digester用于xml解析，用于解析server.xml配置文件
+        //定义规则
         Digester digester = createStartDigester();
 
         InputSource inputSource = null;
@@ -553,6 +576,7 @@ public class Catalina {
         try {
             try {
                 file = configFile();
+                //读取server.xml文件
                 inputStream = new FileInputStream(file);
                 inputSource = new InputSource(file.toURI().toURL().toString());
             } catch (Exception e) {
@@ -630,6 +654,7 @@ public class Catalina {
             }
         }
 
+        //这个server是org.apache.catalina.core.StandardServer对象
         getServer().setCatalina(this);
         getServer().setCatalinaHome(Bootstrap.getCatalinaHomeFile());
         getServer().setCatalinaBase(Bootstrap.getCatalinaBaseFile());
@@ -639,6 +664,7 @@ public class Catalina {
 
         // Start the new server
         try {
+            //执行LifecycleBase父类的init()方法
             getServer().init();
         } catch (LifecycleException e) {
             if (Boolean.getBoolean("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE")) {

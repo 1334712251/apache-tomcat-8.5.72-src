@@ -131,6 +131,7 @@ public abstract class LifecycleBase implements Lifecycle {
             invalidTransition(Lifecycle.BEFORE_INIT_EVENT);
         }
 
+        //执行这里，这里采用模板方法设计模式，按顺序来执行，其中，某个方法由没有具体实现，交给子类实现
         try {
             setStateInternal(LifecycleState.INITIALIZING, null, false);
             initInternal();
