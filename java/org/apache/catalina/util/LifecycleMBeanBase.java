@@ -52,6 +52,7 @@ public abstract class LifecycleMBeanBase extends LifecycleBase
     protected void initInternal() throws LifecycleException {
         // If oname is not null then registration has already happened via
         // preRegister().
+        //这里oname == null为true
         if (oname == null) {
             mserver = Registry.getRegistry(null, null).getMBeanServer();
 

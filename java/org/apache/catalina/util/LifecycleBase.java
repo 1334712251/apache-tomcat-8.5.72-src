@@ -125,6 +125,7 @@ public abstract class LifecycleBase implements Lifecycle {
     }
 
 
+    //初始化的实现都是调用这个方法
     @Override
     public final synchronized void init() throws LifecycleException {
         if (!state.equals(LifecycleState.NEW)) {
@@ -134,6 +135,7 @@ public abstract class LifecycleBase implements Lifecycle {
         //执行这里，这里采用模板方法设计模式，按顺序来执行，其中，某个方法由没有具体实现，交给子类实现
         try {
             setStateInternal(LifecycleState.INITIALIZING, null, false);
+            //抽象方法由子类实现
             initInternal();
             setStateInternal(LifecycleState.INITIALIZED, null, false);
         } catch (Throwable t) {
