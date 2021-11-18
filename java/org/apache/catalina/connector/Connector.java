@@ -1043,7 +1043,9 @@ public class Connector extends LifecycleMBeanBase  {
         super.initInternal();
 
         // Initialize adapter
+        //绑定一个adapter
         adapter = new CoyoteAdapter(this);
+        //与protocolHandler绑定
         protocolHandler.setAdapter(adapter);
 
         // Make sure parseBodyMethodsSet has a default
@@ -1071,6 +1073,7 @@ public class Connector extends LifecycleMBeanBase  {
         }
 
         try {
+            //protocolHandler初始化
             protocolHandler.init();
         } catch (Exception e) {
             throw new LifecycleException(

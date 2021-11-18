@@ -210,14 +210,19 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
     /**
      * Initialize the endpoint.
+     *
+     * 绑定端口
      */
     @Override
     public void bind() throws Exception {
 
         if (!getUseInheritedChannel()) {
+            //获取nio通信通道channel
             serverSock = ServerSocketChannel.open();
             socketProperties.setProperties(serverSock.socket());
             InetSocketAddress addr = (getAddress()!=null?new InetSocketAddress(getAddress(),getPort()):new InetSocketAddress(getPort()));
+            //绑定端口，但尚未使用accept获取客户端连接
+            //addr = 0.0.0.0/0.0.0.0:8080
             serverSock.socket().bind(addr,getAcceptCount());
         } else {
             // Retrieve the channel provided by the OS

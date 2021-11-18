@@ -591,11 +591,12 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
             Registry.getRegistry(null, null).registerComponent(
                     getHandler().getGlobal(), rgOname, null);
         }
-
+        //endpointName="http-nio-8080"
         String endpointName = getName();
         endpoint.setName(endpointName.substring(1, endpointName.length()-1));
         endpoint.setDomain(domain);
 
+        //通信端点的初始化
         endpoint.init();
     }
 
