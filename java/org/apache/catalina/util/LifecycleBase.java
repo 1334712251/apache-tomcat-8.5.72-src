@@ -154,11 +154,15 @@ public abstract class LifecycleBase implements Lifecycle {
 
 
     /**
+     *
+     * 执行这里父类的start方法
+     *
      * {@inheritDoc}
      */
     @Override
     public final synchronized void start() throws LifecycleException {
 
+        //此时state的状态值为INITIALIZED
         if (LifecycleState.STARTING_PREP.equals(state) || LifecycleState.STARTING.equals(state) ||
                 LifecycleState.STARTED.equals(state)) {
 
@@ -181,8 +185,11 @@ public abstract class LifecycleBase implements Lifecycle {
             invalidTransition(Lifecycle.BEFORE_START_EVENT);
         }
 
+        //执行下面，上面判断的不符合
         try {
+            //设置state的状态值为STARTING_PREP
             setStateInternal(LifecycleState.STARTING_PREP, null, false);
+            //这里还是模板方法，父类的抽象方法由子类实现
             startInternal();
             if (state.equals(LifecycleState.FAILED)) {
                 // This is a 'controlled' failure. The component put itself into the

@@ -701,6 +701,7 @@ public class Catalina {
      */
     public void start() {
 
+
         if (getServer() == null) {
             load();
         }
@@ -714,6 +715,7 @@ public class Catalina {
 
         // Start the new server
         try {
+            //执行LifecycleBase父类的start方法
             getServer().start();
         } catch (LifecycleException e) {
             log.fatal(sm.getString("catalina.serverStartFail"), e);

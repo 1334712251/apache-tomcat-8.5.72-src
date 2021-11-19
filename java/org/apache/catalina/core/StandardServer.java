@@ -755,9 +755,11 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         fireLifecycleEvent(CONFIGURE_START_EVENT, null);
         setState(LifecycleState.STARTING);
 
+        //GlobalNamingResources启动
         globalNamingResources.start();
 
         // Start our defined Services
+        //又循环到每个service启动
         synchronized (servicesLock) {
             for (Service service : services) {
                 service.start();

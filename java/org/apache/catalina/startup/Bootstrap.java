@@ -495,8 +495,10 @@ public final class Bootstrap {
                 //执行Catalina方法里的setAwait方法
                 daemon.setAwait(true);
                 //执行Catalina方法里的load方法
+                //初始化阶段：一级一级的初始化server组件（对象的实例化）
                 daemon.load(args);
                 //执行Catalina方法里的start方法
+                //启动阶段：一级一级的启动，开始accept接受请求
                 daemon.start();
                 //执行Catalina方法里的getServer方法
                 //如果返回为空，停止运行
