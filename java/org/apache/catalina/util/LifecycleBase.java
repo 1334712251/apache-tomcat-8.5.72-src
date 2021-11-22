@@ -44,6 +44,8 @@ public abstract class LifecycleBase implements Lifecycle {
     /**
      * The list of registered LifecycleListeners for event notifications.
      */
+    //定义了一个List容器用于保存注册的监听器
+    //这里使用了CopyOnWriteArrayList，通过读写分离来提高并发环境下的事件响应效率。
     private final List<LifecycleListener> lifecycleListeners = new CopyOnWriteArrayList<>();
 
 
@@ -134,6 +136,7 @@ public abstract class LifecycleBase implements Lifecycle {
 
         //执行这里，这里采用模板方法设计模式，按顺序来执行，其中，某个方法由没有具体实现，交给子类实现
         try {
+            //设置状态，监听状态
             setStateInternal(LifecycleState.INITIALIZING, null, false);
             //抽象方法由子类实现
             initInternal();
@@ -393,6 +396,7 @@ public abstract class LifecycleBase implements Lifecycle {
     }
 
 
+    //改变状态
     private synchronized void setStateInternal(LifecycleState state, Object data, boolean check)
             throws LifecycleException {
 

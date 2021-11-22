@@ -37,6 +37,7 @@ public final class LifecycleEvent extends EventObject {
      * @param data Event data (if any)
      */
     public LifecycleEvent(Lifecycle lifecycle, String type, Object data) {
+        //表示事件来源的组件source
         super(lifecycle);
         this.type = type;
         this.data = data;
@@ -52,6 +53,7 @@ public final class LifecycleEvent extends EventObject {
     /**
      * The event type this instance represents.
      */
+    //发生事件的类型
     private final String type;
 
 
