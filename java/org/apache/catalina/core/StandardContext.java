@@ -3790,6 +3790,7 @@ public class StandardContext extends ContainerBase
         setPaused(true);
 
         try {
+            //热部署，停止context
             stop();
         } catch (LifecycleException e) {
             log.error(
@@ -3797,6 +3798,7 @@ public class StandardContext extends ContainerBase
         }
 
         try {
+            //启动context
             start();
         } catch (LifecycleException e) {
             log.error(
@@ -5597,6 +5599,7 @@ public class StandardContext extends ContainerBase
             return;
         }
 
+        //webappLoader周期性检查web-inf/classes和web-inf/lib目录下的类文件
         Loader loader = getLoader();
         if (loader != null) {
             try {
@@ -5606,6 +5609,7 @@ public class StandardContext extends ContainerBase
                         "standardContext.backgroundProcess.loader", loader), e);
             }
         }
+        //session管理器周期性的检查是否有过期的session
         Manager manager = getManager();
         if (manager != null) {
             try {
@@ -5616,6 +5620,7 @@ public class StandardContext extends ContainerBase
                         e);
             }
         }
+        //周期性的检查静态资源是否有变化
         WebResourceRoot resources = getResources();
         if (resources != null) {
             try {
@@ -5626,6 +5631,8 @@ public class StandardContext extends ContainerBase
                         resources), e);
             }
         }
+
+        //
         InstanceManager instanceManager = getInstanceManager();
         if (instanceManager instanceof DefaultInstanceManager) {
             try {
@@ -5636,6 +5643,7 @@ public class StandardContext extends ContainerBase
                         resources), e);
             }
         }
+        //调用父类ContainerBase的backgroundProcess方法
         super.backgroundProcess();
     }
 

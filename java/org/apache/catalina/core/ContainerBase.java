@@ -978,7 +978,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
         setState(LifecycleState.STARTING);
 
         // Start our thread
-        //后续操作
+        //开启线程监听状态进行后续操作
         threadStart();
     }
 
@@ -1158,6 +1158,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
             return;
         }
 
+        //执行容器中cluster组件的周期性任务
         Cluster cluster = getClusterInternal();
         if (cluster != null) {
             try {
@@ -1167,6 +1168,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
                         cluster), e);
             }
         }
+        //执行容器中Realm
         Realm realm = getRealmInternal();
         if (realm != null) {
             try {
@@ -1175,6 +1177,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
                 log.warn(sm.getString("containerBase.backgroundProcess.realm", realm), e);
             }
         }
+        //执行容器中valve组件的周期性任务
         Valve current = pipeline.getFirst();
         while (current != null) {
             try {
@@ -1184,6 +1187,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
             }
             current = current.getNext();
         }
+        //触发容器的周期事件，host容器的监听器HostConfig就靠它来调用
         fireLifecycleEvent(Lifecycle.PERIODIC_EVENT, null);
     }
 
@@ -1366,6 +1370,9 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
      * Private runnable class to invoke the backgroundProcess method
      * of this container and its children after a fixed delay.
      */
+    //ContainerBackgroudProcessor线程每隔backgroundProcessorDelay秒去执行递归指定自己及子容器的backgroundProcessor方法，
+    //由于backgroundProcessorDelay大于0的容器会有一个自己的ContainerBackgroudProcessor线程，
+    //所以只会执行backgroundProcessorDelay不大于0的子容器的backgroundProcessor方法。
     protected class ContainerBackgroundProcessor implements Runnable {
 
         @Override
@@ -1413,6 +1420,8 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
                 container.backgroundProcess();
                 Container[] children = container.findChildren();
                 for (Container child : children) {
+                    //由于backgroundProcessorDelay大于0的容器会有一个自己的ContainerBackgroudProcessor线程，
+                    // 所以只会执行backgroundProcessorDelay不大于0的子容器的backgroundProcessor方法。
                     if (child.getBackgroundProcessorDelay() <= 0) {
                         processChildren(child);
                     }
