@@ -315,6 +315,7 @@ public class HostConfig implements LifecycleListener {
         } else if (event.getType().equals(Lifecycle.BEFORE_START_EVENT)) {
             beforeStart();
         } else if (event.getType().equals(Lifecycle.START_EVENT)) {
+            //获取到的状态是start,执行这里
             start();
         } else if (event.getType().equals(Lifecycle.STOP_EVENT)) {
             stop();
@@ -465,14 +466,19 @@ public class HostConfig implements LifecycleListener {
      * in our "application root" directory.
      */
     protected void deployApps() {
+        //appBase = F:\IdeaProjects\apache-tomcat-8.5.72-src\home\webapps
         File appBase = host.getAppBaseFile();
+        //configBase = F:\IdeaProjects\apache-tomcat-8.5.72-src\home\conf\Catalina\localhost
         File configBase = host.getConfigBaseFile();
         String[] filteredAppPaths = filterAppPaths(appBase.list());
         // Deploy XML descriptors from configBase
+        //以xml文件配置，部署
         deployDescriptors(configBase, configBase.list());
         // Deploy WARs
+        //处理host下面以war包方式部署的app-context，需要解压
         deployWARs(appBase, filteredAppPaths);
         // Deploy expanded folders
+        //处理host下面以目录方式部署的app-context
         deployDirectories(appBase, filteredAppPaths);
     }
 
@@ -1084,6 +1090,7 @@ public class HostConfig implements LifecycleListener {
                         }
 
                         // DeployDirectory will call removeServiced
+                        //把context的创建和start以线程方式提交
                         results.add(es.submit(new DeployDirectory(this, cn, dir)));
                     } catch (Throwable t) {
                         ExceptionUtils.handleThrowable(t);
@@ -1606,7 +1613,9 @@ public class HostConfig implements LifecycleListener {
             host.setAutoDeploy(false);
         }
 
+        //部署webAPP应用
         if (host.getDeployOnStartup()) {
+            //处理多个host下多个应用
             deployApps();
         }
     }

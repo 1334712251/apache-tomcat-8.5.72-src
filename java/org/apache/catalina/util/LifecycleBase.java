@@ -121,6 +121,7 @@ public abstract class LifecycleBase implements Lifecycle {
      */
     protected void fireLifecycleEvent(String type, Object data) {
         LifecycleEvent event = new LifecycleEvent(this, type, data);
+        //这里的LifecycleListener对象是在Catalina对象解析server.xml文件时就已经创建好并加到lifecycleListeners里的
         for (LifecycleListener listener : lifecycleListeners) {
             listener.lifecycleEvent(event);
         }
@@ -130,6 +131,7 @@ public abstract class LifecycleBase implements Lifecycle {
     //初始化的实现都是调用这个方法
     @Override
     public final synchronized void init() throws LifecycleException {
+        //如果不是new状态不允许调用init方法
         if (!state.equals(LifecycleState.NEW)) {
             invalidTransition(Lifecycle.BEFORE_INIT_EVENT);
         }
@@ -137,9 +139,11 @@ public abstract class LifecycleBase implements Lifecycle {
         //执行这里，这里采用模板方法设计模式，按顺序来执行，其中，某个方法由没有具体实现，交给子类实现
         try {
             //设置状态，监听状态
+            //初始化逻辑之前，现将状态变更为 INITIALIZING
             setStateInternal(LifecycleState.INITIALIZING, null, false);
             //抽象方法由子类实现
             initInternal();
+            //初始化完成之后，状态变更为 INITIALIZED 初始化完成
             setStateInternal(LifecycleState.INITIALIZED, null, false);
         } catch (Throwable t) {
             handleSubClassException(t, "lifecycleBase.initFail", toString());
@@ -409,6 +413,7 @@ public abstract class LifecycleBase implements Lifecycle {
             // code in this class is correct)
             // null is never a valid state
             if (state == null) {
+                //空状态报异常
                 invalidTransition("null");
                 // Unreachable code - here to stop eclipse complaining about
                 // a possible NPE further down the method
@@ -419,6 +424,7 @@ public abstract class LifecycleBase implements Lifecycle {
             // startInternal() permits STARTING_PREP to STARTING
             // stopInternal() permits STOPPING_PREP to STOPPING and FAILED to
             // STOPPING
+            //任何状态都可以转为failed
             if (!(state == LifecycleState.FAILED ||
                     (this.state == LifecycleState.STARTING_PREP &&
                             state == LifecycleState.STARTING) ||
@@ -430,10 +436,12 @@ public abstract class LifecycleBase implements Lifecycle {
                 invalidTransition(state.name());
             }
         }
-
+        //设置状态
         this.state = state;
+        //触发事件
         String lifecycleEvent = state.getLifecycleEvent();
         if (lifecycleEvent != null) {
+            //设置状态后进行事件的触发，通知事件监听器
             fireLifecycleEvent(lifecycleEvent, data);
         }
     }

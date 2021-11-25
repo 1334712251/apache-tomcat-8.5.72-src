@@ -806,6 +806,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
      */
     @Override
     public Container[] findChildren() {
+        //children = localhost -> {StandardHost@2386} "StandardEngine[Catalina].StandardHost[localhost]"
         synchronized (children) {
             Container results[] = new Container[children.size()];
             return children.values().toArray(results);
@@ -924,19 +925,25 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
         // Start our subordinate components, if any
         logger = null;
         getLogger();
+        //如果配置了集群组件Cluster则启动
         Cluster cluster = getClusterInternal();
         if (cluster instanceof Lifecycle) {
             ((Lifecycle) cluster).start();
         }
+        //如果配置了安全组件,则启动
         Realm realm = getRealmInternal();
         if (realm instanceof Lifecycle) {
             ((Lifecycle) realm).start();
         }
 
         // Start our child containers, if any
+        //查找子容器，启动子容器，host在初始化阶段后还是不完整的需要继续封装，把容器关系维护完整
+        //children = StandardEngine[Catalina].StandardHost[localhost]
         Container children[] = findChildren();
         List<Future<Void>> results = new ArrayList<>();
         for (Container child : children) {
+            //使用线程池并行实例化多个host
+            //线程池提交线程，如果有多个host那么就可以多个线程一起并行实例化host。加快tomcat启动速度
             results.add(startStopExecutor.submit(new StartChild(child)));
         }
 
@@ -964,9 +971,14 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
             ((Lifecycle) pipeline).start();
         }
 
+
+        //host的实例化，是通过设置生明周期状态state，通过触发host的生命周期事件LifecycleEvent来执行后续
+        //后续需要实例化context的工作交给HostConfig进行
+        //HostConfig是一个生命周期监听器，监听到事件会触发相应的执行
         setState(LifecycleState.STARTING);
 
         // Start our thread
+        //后续操作
         threadStart();
     }
 
@@ -1419,6 +1431,9 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
 
     // ---------------------------- Inner classes used with start/stop Executor
 
+    /**
+     * 定义执行语句
+     */
     private static class StartChild implements Callable<Void> {
 
         private Container child;
