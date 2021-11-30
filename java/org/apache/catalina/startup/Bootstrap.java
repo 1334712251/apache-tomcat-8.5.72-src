@@ -460,7 +460,7 @@ public final class Bootstrap {
                 // 实例化一个当前Bootstrap引导对象
                 Bootstrap bootstrap = new Bootstrap();
                 try {
-                    //执行当前类方法init做一些初始化动作
+                    //初始化一些类加载器
                     bootstrap.init();
                 } catch (Throwable t) {
                     handleThrowable(t);
@@ -496,9 +496,10 @@ public final class Bootstrap {
                 daemon.setAwait(true);
                 //执行Catalina方法里的load方法
                 //初始化阶段：一级一级的初始化server组件（对象的实例化）
+                //加载conf/server.xml，根据规则解析元素为对应对象，并set属性，元素间关联关系，且变更各个对象生命周期状态
                 daemon.load(args);
                 //执行Catalina方法里的start方法
-                //启动阶段：一级一级的启动，开始accept接受请求
+                //启动各个组件，一级一级的启动
                 daemon.start();
                 //执行Catalina方法里的getServer方法
                 //如果返回为空，停止运行
