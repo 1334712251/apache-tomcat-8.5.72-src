@@ -1043,9 +1043,9 @@ public class Connector extends LifecycleMBeanBase  {
         super.initInternal();
 
         // Initialize adapter
-        //绑定一个adapter
+        //初始化adapter
         adapter = new CoyoteAdapter(this);
-        //与protocolHandler绑定
+        //adapter与protocolHandler绑定
         protocolHandler.setAdapter(adapter);
 
         // Make sure parseBodyMethodsSet has a default

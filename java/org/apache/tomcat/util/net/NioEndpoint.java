@@ -222,7 +222,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             socketProperties.setProperties(serverSock.socket());
             InetSocketAddress addr = (getAddress()!=null?new InetSocketAddress(getAddress(),getPort()):new InetSocketAddress(getPort()));
             //绑定端口，但尚未使用accept获取客户端连接
-            //addr = 0.0.0.0/0.0.0.0:8080
+            //addr = 0.0.0.0/0.0.0.0:8080 绑定8080端口
             serverSock.socket().bind(addr,getAcceptCount());
         } else {
             // Retrieve the channel provided by the OS
