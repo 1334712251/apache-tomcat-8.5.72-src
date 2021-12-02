@@ -308,14 +308,17 @@ public class HostConfig implements LifecycleListener {
             log.error(sm.getString("hostConfig.cce", event.getLifecycle()), e);
             return;
         }
-
+        //三次监听到start状态
+        //event.getType()=before_init
+        //event.getType()=after_init
+        //event.getType()=start
         // Process the event that has occurred
         if (event.getType().equals(Lifecycle.PERIODIC_EVENT)) {
             check();
         } else if (event.getType().equals(Lifecycle.BEFORE_START_EVENT)) {
             beforeStart();
         } else if (event.getType().equals(Lifecycle.START_EVENT)) {
-            //获取到的状态是start,执行这里
+            //第三次获取到的状态是start,执行这里
             start();
         } else if (event.getType().equals(Lifecycle.STOP_EVENT)) {
             stop();
@@ -1175,13 +1178,16 @@ public class HostConfig implements LifecycleListener {
 
             Class<?> clazz = Class.forName(host.getConfigClass());
             LifecycleListener listener = (LifecycleListener) clazz.getConstructor().newInstance();
+            /*---------------------------------*/
             context.addLifecycleListener(listener);
 
             context.setName(cn.getName());
             context.setPath(cn.getPath());
             context.setWebappVersion(cn.getVersion());
             context.setDocBase(cn.getBaseName());
+            //此时context还是不完整的，需要进一步封装wrapper(servlet)
             host.addChild(context);
+            /*-------------------------------*/
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             log.error(sm.getString("hostConfig.deployDir.error", dir.getAbsolutePath()), t);
@@ -1615,7 +1621,7 @@ public class HostConfig implements LifecycleListener {
 
         //部署webAPP应用
         if (host.getDeployOnStartup()) {
-            //处理多个host下多个应用
+            //处理多个host下的多个应用
             deployApps();
         }
     }

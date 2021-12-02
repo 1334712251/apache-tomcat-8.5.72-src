@@ -5001,10 +5001,12 @@ public class StandardContext extends ContainerBase
         }
 
         // Post work directory
+        //创建工作目录，tomcat下的work目录
         postWorkDirectory();
 
         // Add missing components as necessary
         if (getResources() == null) {   // (1) Required by Loader
+            //web应用的类加载器webAPPloader，每个context都会有一个
             if (log.isDebugEnabled()) {
                 log.debug("Configuring default Resources");
             }
@@ -5129,6 +5131,7 @@ public class StandardContext extends ContainerBase
                 }
 
                 // Notify our interested LifecycleListeners
+                //发出生命周期事件，调度了ContextConfig，读取web.xml，这里就是读取某一个项目的web.xml内容
                 fireLifecycleEvent(Lifecycle.CONFIGURE_START_EVENT, null);
 
                 // Start our child containers, if not already started

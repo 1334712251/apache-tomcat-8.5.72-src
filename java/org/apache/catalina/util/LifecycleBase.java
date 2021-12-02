@@ -120,6 +120,7 @@ public abstract class LifecycleBase implements Lifecycle {
      * @param data  Data associated with event.
      */
     protected void fireLifecycleEvent(String type, Object data) {
+        System.out.println("iiiiiiiiii"+this);
         LifecycleEvent event = new LifecycleEvent(this, type, data);
         //这里的LifecycleListener对象是在Catalina对象解析server.xml文件时就已经创建好并加到lifecycleListeners里的
         for (LifecycleListener listener : lifecycleListeners) {
