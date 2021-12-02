@@ -296,6 +296,7 @@ public class ContextConfig implements LifecycleListener {
         }
 
         // Process the event that has occurred
+        //处理不同发生的事件
         if (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) {
             configureStart();
         } else if (event.getType().equals(Lifecycle.BEFORE_START_EVENT)) {

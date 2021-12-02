@@ -4931,6 +4931,7 @@ public class StandardContext extends ContainerBase
     public boolean loadOnStartup(Container children[]) {
 
         // Collect "load on startup" servlets that need to be initialized
+        //wrapper只有servlet的相关信息，但是没有servlet的实例instance
         TreeMap<Integer, ArrayList<Wrapper>> map = new TreeMap<>();
         for (Container child : children) {
             Wrapper wrapper = (Wrapper) child;
@@ -4948,6 +4949,7 @@ public class StandardContext extends ContainerBase
         }
 
         // Load the collected "load on startup" servlets
+        //加载和启动servlet
         for (ArrayList<Wrapper> list : map.values()) {
             for (Wrapper wrapper : list) {
                 try {
@@ -5267,6 +5269,8 @@ public class StandardContext extends ContainerBase
             }
 
             // Load and initialize all "load on startup" servlets
+            //加载并初始化所有“启动时加载”servlet
+            //加载初始化servlet （配置了容器启动加载的）
             if (ok) {
                 if (!loadOnStartup(findChildren())){
                     log.error(sm.getString("standardContext.servletFail"));

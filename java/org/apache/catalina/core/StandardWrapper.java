@@ -1008,6 +1008,7 @@ public class StandardWrapper extends ContainerBase
      */
     @Override
     public synchronized void load() throws ServletException {
+        //实例化servlet
         instance = loadServlet();
 
         if (!instanceInitialized) {
@@ -1115,6 +1116,7 @@ public class StandardWrapper extends ContainerBase
                 singleThreadModel = true;
             }
 
+            //执行servlet的初始化方法
             initServlet(servlet);
 
             fireContainerEvent("load", this);
@@ -1172,7 +1174,7 @@ public class StandardWrapper extends ContainerBase
             } else {
                 servlet.init(facade);
             }
-
+            //不再实例初始化
             instanceInitialized = true;
         } catch (UnavailableException f) {
             unavailable(f);
